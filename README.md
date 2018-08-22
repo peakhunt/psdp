@@ -15,11 +15,13 @@ Here is the list of details of my implementation.
     So
 
     v=0
+      
     s=title
 
     is same as
 
     s=title
+      
     v=0
 
   * 
