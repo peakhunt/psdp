@@ -273,7 +273,7 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
     }
     break;
 
-  case psdp_type_b:
+  case psdp_type_b:     // multiple
     if(parser->parsing_session)
     {
       if(psdp->num_b >= PSDP_MAX_BANDWIDTH_INFO)
@@ -283,7 +283,12 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
       else
       {
         psdp_read_line(parser, &psdp->b[psdp->num_b]);
-        psdp->num_b++;
+
+        // ignore zero length value
+        if(psdp->b[psdp->num_b].val_len != 0)
+        {
+          psdp->num_b++;
+        }
       }
     }
     else
@@ -295,7 +300,11 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
       else
       {
         psdp_read_line(parser, &parser->cm->b[parser->cm->num_b]);
-        parser->cm->num_b++;
+        // ignore zero length value
+        if(parser->cm->b[parser->cm->num_b].val_len != 0)
+        {
+          parser->cm->num_b++;
+        }
       }
     }
     break;
@@ -322,7 +331,7 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
     }
     break;
 
-  case psdp_type_a:
+  case psdp_type_a:   // multiple
     if(parser->parsing_session)
     {
       if(psdp->num_a >= PSDP_MAX_SESSION_ATTR)
@@ -332,7 +341,12 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
       else
       {
         psdp_read_line(parser, &psdp->a[psdp->num_a]);
-        psdp->num_a++;
+
+        // ignore zero length value
+        if(psdp->a[psdp->num_a].val_len != 0)
+        {
+          psdp->num_a++;
+        }
       }
     }
     else
@@ -344,7 +358,12 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
       else
       {
         psdp_read_line(parser, &parser->cm->a[parser->cm->num_a]);
-        parser->cm->num_a++;
+
+        // ignore zero length value
+        if(parser->cm->a[parser->cm->num_a].val_len != 0)
+        {
+          parser->cm->num_a++;
+        }
       }
     }
     break;
@@ -357,7 +376,7 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
     psdp_parse_if_session_mode_ignore_otherwise(parser, &psdp->r);
     break;
 
-  case psdp_type_m:
+  case psdp_type_m:   // multiple
     if(parser->parsing_session)
     {
       parser->parsing_session = PSDP_FALSE;
@@ -370,9 +389,17 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
       else
       {
         parser->cm = &psdp->media[psdp->num_m];
-        psdp->num_m++;
-
         psdp_read_line(parser, &parser->cm->m);
+
+        // ignore zero length value
+        if(parser->cm->m.val_len == 0)
+        {
+          parser->cm = NULL;
+        }
+        else
+        {
+          psdp->num_m++;
+        }
       }
     }
     else
@@ -385,9 +412,17 @@ psdp_parse_internal(psdp_parser_t* parser, psdp_t* psdp)
       else
       {
         parser->cm = &psdp->media[psdp->num_m];
-        psdp->num_m++;
-
         psdp_read_line(parser, &parser->cm->m);
+
+        // ignore zero length value
+        if(parser->cm->m.val_len == 0)
+        {
+          parser->cm = NULL;
+        }
+        else
+        {
+          psdp->num_m++;
+        }
       }
     }
     break;

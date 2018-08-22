@@ -1218,6 +1218,78 @@ psdp_test_unknown(void)
   CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[5], "mid:secondary") == PSDP_TRUE);
 }
 
+static void
+psdp_test_ignore_zero_val_len(void)
+{
+  psdp_parser_t   parser;
+  psdp_t          sdp;
+
+  static const char*    sdp_msg2 = \
+  "b=12345678901234567890\r\n" \
+  "b=\r\n" \
+  "b=\r\n" \
+  "b=dddddddddddddddddddd\r\n" \
+  ;
+
+  static const char*    sdp_msg3 = \
+  "b=12345678901234567890\r\n" \
+  "b=\r\n" \
+  "b=cccccccccccccccccccc\r\n" \
+  "b=\r\n" \
+  "b=not ignored\r\n" \
+  ;
+
+  static const char*    sdp_msg4 = \
+  "m=12345678901234567890\r\n" \
+  "b=b1b1b1b1b1b1b1b1b1b1\r\n" \
+  "a=a1a1a1a1a1a1a1a1a1a1\r\n" \
+  "m=\r\n" \
+  "b=ignored\r\n" \
+  "b=ignored\r\n" \
+  "m=mmmmmmmmmmmmmmmmmmmm\r\n" \
+  "b=\r\n" \
+  "b=\r\n" \
+  "b=b3b3b3b3b3b3b3b3b3b3\r\n" \
+  "m=nnnnnnnnnnnnnnnnnnnn\r\n" \
+  "b=\r\n" \
+  "b=b2b2b2b2b2b2b2b2b2b2\r\n" \
+  "a=\r\n" \
+  "a=b4b4b4b4b4b4b4b4b4b4\r\n"
+  ;
+
+  psdp_parse(&parser, &sdp, (uint8_t*)sdp_msg2, strlen(sdp_msg2));
+  CU_ASSERT(sdp.num_b == 2);
+  CU_ASSERT(sdp.b[0].val_len == 20);
+  CU_ASSERT(psdp_str_cmp(&sdp.b[0], "12345678901234567890") == PSDP_TRUE);
+  CU_ASSERT(sdp.b[1].val_len == 20);
+  CU_ASSERT(psdp_str_cmp(&sdp.b[1], "dddddddddddddddddddd") == PSDP_TRUE);
+
+  psdp_parse(&parser, &sdp, (uint8_t*)sdp_msg3, strlen(sdp_msg3));
+  CU_ASSERT(sdp.num_b == 3);
+  CU_ASSERT(sdp.b[0].val_len == 20);
+  CU_ASSERT(psdp_str_cmp(&sdp.b[0], "12345678901234567890") == PSDP_TRUE);
+  CU_ASSERT(sdp.b[1].val_len == 20);
+  CU_ASSERT(psdp_str_cmp(&sdp.b[1], "cccccccccccccccccccc") == PSDP_TRUE);
+  CU_ASSERT(sdp.b[2].val_len == 11);
+  CU_ASSERT(psdp_str_cmp(&sdp.b[2], "not ignored") == PSDP_TRUE);
+
+  psdp_parse(&parser, &sdp, (uint8_t*)sdp_msg4, strlen(sdp_msg4));
+  CU_ASSERT(sdp.num_m == 3);
+  CU_ASSERT(sdp.media[0].num_b == 1);
+  CU_ASSERT(sdp.media[0].num_a == 1);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].b[0], "b1b1b1b1b1b1b1b1b1b1") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[0], "a1a1a1a1a1a1a1a1a1a1") == PSDP_TRUE);
+
+  CU_ASSERT(sdp.media[1].num_b == 1);
+  CU_ASSERT(sdp.media[1].num_a == 0);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].b[0], "b3b3b3b3b3b3b3b3b3b3") == PSDP_TRUE);
+
+  CU_ASSERT(sdp.media[2].num_b == 1);
+  CU_ASSERT(sdp.media[2].num_a == 1);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[2].b[0], "b2b2b2b2b2b2b2b2b2b2") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[2].a[0], "b4b4b4b4b4b4b4b4b4b4") == PSDP_TRUE);
+}
+
 int
 main()
 {
@@ -1256,6 +1328,7 @@ main()
   CU_add_test(pSuite, "psdp_test_overflow", psdp_test_overflow);
   CU_add_test(pSuite, "psdp_test_total_1", psdp_test_total_1);
   CU_add_test(pSuite, "psdp_test_unknown", psdp_test_unknown);
+  CU_add_test(pSuite, "psdp_test_ignore_zero_val_len", psdp_test_ignore_zero_val_len);
 
   /* Run all tests using the basic interface */
   CU_basic_set_mode(CU_BRM_VERBOSE);
