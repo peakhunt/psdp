@@ -36,7 +36,7 @@ Here is the list of details of the current implementation.
 * for b=/a=, each appearance is just added to the array.
   if array overflow occurs, the value is simply ignored.
 
-   So assuming max array configured for b= is 3
+   So assuming max array size configured for b= is 3
 ```
   b=b1
   b=b2
@@ -46,7 +46,7 @@ Here is the list of details of the current implementation.
 ```
   number of items in b= array is 3 and the last 2 are simpley ignored
 
-* m= switches to media parsing mode from session parsing mode.
+* m= causes switch to media parsing mode from session parsing mode.
   This means whatever comes next, it won't affect anything in session level type values.
   If m= is valid, which means length of its value is not empty, the number of media descriptor
   is incremented. If there is an overflow, it's simply discarded
@@ -55,3 +55,5 @@ Here is the list of details of the current implementation.
 
 
 I believe this implementation is much simpler and more flexible. Also it parses valid SDPs correctly.
+
+And as state above, all the nitty gritty semantic checks are up to you.
