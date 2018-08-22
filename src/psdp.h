@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#define PSDP_MAX_STRINGS            256
 #define PSDP_TRUE                   1
 #define PSDP_FALSE                  0
 
