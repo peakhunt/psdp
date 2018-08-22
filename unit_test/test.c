@@ -1137,6 +1137,87 @@ psdp_test_total_1(void)
 
 }
 
+static void
+psdp_test_unknown(void)
+{
+  psdp_parser_t   parser;
+  psdp_t          sdp;
+
+  const static char*    sdp_msg = \
+"  1231\r\n"
+"v=0\r\n" \
+"A=unknown unkown\n"
+"o=- 123456 11 IN IP4 192.168.100.2\r\n" \
+"s=Example of a SMPTE ST2110-20 signal\r\n" \
+"i=this example is for 720p video at 59.94\r\n" \
+"\r\n" \
+"\r\n" \
+"\r\n" \
+"\r\n" \
+"t=0 0\r\n" \
+"a=recvonly\r\n" \
+"a=group:DUP primary secondary\r\n" \
+"m=video 50000 RTP/AVP 112\r\n" \
+"\r\n" \
+"MM\r\n"\
+"c=IN IP4 239.100.9.10/32\r\n" \
+"a=source-filter:incl IN IP4 239.100.9.10 192.168.100.2\r\n" \
+"a=rtpmap:112 raw/90000\r\n" \
+"a=fmtp:112 sampling=YCbCr-4:2:2; width=1280; height=720; exactframerate=60000/1001; depth=10; TCS=SDR; colorimetry=BT709; PM=2110GPM; TP=2110TPN; SSN=ST2110-20:2017;\r\n"\
+"a=ts-refclk:ptp=IEEE1588-2008:39-A7-94-FF-FE-07-CB-D0:37\r\n" \
+"a=mediaclk:direct=0\r\n" \
+"Z=another unknown\r\n"\
+"a=mid:primary\r\n" \
+"m=video 50020 RTP/AVP 112\r\n" \
+"c=IN IP4 239.101.9.10/32\r\n" \
+"a=source-filter:incl IN IP4 239.101.9.10 192.168.101.2\r\n" \
+"\n" \
+"Z=wacky\r\n"\
+"\n" \
+"a=rtpmap:112 raw/90000\r\n" \
+"\n" \
+"a=fmtp:112 sampling=YCbCr-4:2:2; width=1280; height=720; exactframerate=60000/1001; depth=10; TCS=SDR; colorimetry=BT709; PM=2110GPM; TP=2110TPN; SSN=ST2110-20:2017;\r\n" \
+"\n" \
+"a=ts-refclk:ptp=IEEE1588-2008:39-A7-94-FF-FE-07-CB-D0:37\r\n" \
+"\n" \
+"a=mediaclk:direct=0\r\n" \
+"a=mid:secondary\r\n" \
+"                   \r\n";
+
+  psdp_parse(&parser, &sdp, (uint8_t*)sdp_msg, strlen(sdp_msg));
+  CU_ASSERT(psdp_str_cmp(&sdp.v, "0") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.o, "- 123456 11 IN IP4 192.168.100.2") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.s, "Example of a SMPTE ST2110-20 signal") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.i, "this example is for 720p video at 59.94") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.t, "0 0") == PSDP_TRUE);
+  CU_ASSERT(sdp.num_a == 2);
+  CU_ASSERT(psdp_str_cmp(&sdp.a[0], "recvonly") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.a[1], "group:DUP primary secondary") == PSDP_TRUE);
+
+  CU_ASSERT(sdp.num_m == 2);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].m, "video 50000 RTP/AVP 112") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].c, "IN IP4 239.100.9.10/32") == PSDP_TRUE);
+
+  CU_ASSERT(sdp.media[0].num_a == 6);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[0], "source-filter:incl IN IP4 239.100.9.10 192.168.100.2") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[1], "rtpmap:112 raw/90000") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[2], "fmtp:112 sampling=YCbCr-4:2:2; width=1280; height=720; exactframerate=60000/1001; depth=10; TCS=SDR; colorimetry=BT709; PM=2110GPM; TP=2110TPN; SSN=ST2110-20:2017;") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[3], "ts-refclk:ptp=IEEE1588-2008:39-A7-94-FF-FE-07-CB-D0:37") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[4], "mediaclk:direct=0") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[0].a[5], "mid:primary") == PSDP_TRUE);
+
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].m, "video 50020 RTP/AVP 112") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].c, "IN IP4 239.101.9.10/32") == PSDP_TRUE);
+
+  CU_ASSERT(sdp.media[1].num_a == 6);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[0], "source-filter:incl IN IP4 239.101.9.10 192.168.101.2") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[1], "rtpmap:112 raw/90000") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[2], "fmtp:112 sampling=YCbCr-4:2:2; width=1280; height=720; exactframerate=60000/1001; depth=10; TCS=SDR; colorimetry=BT709; PM=2110GPM; TP=2110TPN; SSN=ST2110-20:2017;") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[3], "ts-refclk:ptp=IEEE1588-2008:39-A7-94-FF-FE-07-CB-D0:37") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[4], "mediaclk:direct=0") == PSDP_TRUE);
+  CU_ASSERT(psdp_str_cmp(&sdp.media[1].a[5], "mid:secondary") == PSDP_TRUE);
+}
+
 int
 main()
 {
@@ -1174,6 +1255,7 @@ main()
   CU_add_test(pSuite, "psdp_test_m_a", psdp_test_m_a);
   CU_add_test(pSuite, "psdp_test_overflow", psdp_test_overflow);
   CU_add_test(pSuite, "psdp_test_total_1", psdp_test_total_1);
+  CU_add_test(pSuite, "psdp_test_unknown", psdp_test_unknown);
 
   /* Run all tests using the basic interface */
   CU_basic_set_mode(CU_BRM_VERBOSE);
