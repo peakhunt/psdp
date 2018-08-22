@@ -8,20 +8,18 @@ Instead, I choose to adopt a simple tokening approach when parsing SDP messages.
 ## Implementation Details
 Here is the list of details of my implementation.
 
-  * the order doesn't matter in session level.
-    RFC4566 spcifies that type/value pairs should be listed in the order specified in the spec.
-    This implementation doesn't.
+* the order doesn't matter in session level.
+  RFC4566 spcifies that type/value pairs should be listed in the order specified in the spec.
+  This implementation doesn't.
 
-    So
+  So
 
-    v=0
-      
-    s=title
+  v=0
+  s=title
 
-    is same as
+  is same as
 
-    s=title
-      
-    v=0
+  s=title
+  v=0
 
-  * 
+* 
