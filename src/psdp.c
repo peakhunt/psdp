@@ -68,6 +68,7 @@
       also, m= increments the number of media descriptor counter.
    e) overflown type-values are silently ignored
    f) overflow media type-values are silently ignored
+   g) types with zero length value are silently ignored
 
    I think this implementation is much better and flexible than the parsing rule specified in RFC.
    And it will parse valid SDPs correctly.
@@ -172,6 +173,11 @@ psdp_read_line(psdp_parser_t* parser, psdp_str* line)
     line->val_len++;
     parser->ndx++;
   }
+
+  //
+  // XXX
+  // left right trim???
+  //
 }
 
 static psdp_tv_type_t
